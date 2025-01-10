@@ -2,6 +2,7 @@ import React from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Form, Input, Typography } from 'antd';
 import background from '../assets/wp6774751.jpg';
+import { useNavigate } from 'react-router-dom';
 const { Title } = Typography;
 
 const formStyle: React.CSSProperties = {
@@ -53,8 +54,10 @@ interface LoginProps {
 }
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const onFinish = (values: LoginProps) => {
     console.log('Received values of form: ', values);
+    navigate('/main');
   };
 
   return (
