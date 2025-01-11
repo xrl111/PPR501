@@ -1,49 +1,78 @@
 import React from 'react';
 
-import { InboxOutlined } from '@ant-design/icons';
-import type { UploadProps } from 'antd';
 import { Wrapper } from '../atoms/Wrapper';
-import { message, Upload } from 'antd';
-
-const { Dragger } = Upload;
-
-const props: UploadProps = {
-  name: 'file',
-  multiple: true,
-  action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`);
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
+import { Input, Form, Select, Flex, Button } from 'antd';
+const { Item } = Form;
+const options = [
+  {
+    value: '1',
+    label: 'Not Identified',
   },
-  onDrop(e) {
-    console.log('Dropped files', e.dataTransfer.files);
+  {
+    value: '2',
+    label: 'Closed',
   },
+  {
+    value: '3',
+    label: 'Communicated',
+  },
+  {
+    value: '4',
+    label: 'Identified',
+  },
+  {
+    value: '5',
+    label: 'Resolved',
+  },
+  {
+    value: '6',
+    label: 'Cancelled',
+  },
+];
+interface Option {
+  value: string;
+  label: string;
+}
+const filterSort = (optionA: Option, optionB: Option) => {
+  return (optionA?.label ?? '')
+    .toLowerCase()
+    .localeCompare((optionB?.label ?? '').toLowerCase());
 };
-
 const ImportQuiz: React.FC = () => {
+  const [form] = Form.useForm();
   return (
     <Wrapper>
       <h1>Import Quiz</h1>
       <hr />
-      <Dragger {...props}>
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">
-          Click or drag file to this area to upload
-        </p>
-        <p className="ant-upload-hint">
-          Support for a single or bulk upload. Strictly prohibited from
-          uploading company data or other banned files.
-        </p>
-      </Dragger>
+      <Form form={form}>
+        <Flex justify="space-around" wrap>
+          <Item label="Tên lớp">
+            <Select
+              showSearch
+              placeholder="Search to Select"
+              optionFilterProp="label"
+              filterSort={filterSort}
+              options={options}
+            />
+          </Item>
+          <Item label="Tên môn">
+            <Select
+              showSearch
+              placeholder="Search to Select"
+              optionFilterProp="label"
+              filterSort={filterSort}
+              options={options}
+            />
+          </Item>
+          <Item label="File">
+            <Input type="file" />
+          </Item>
+          <Item>
+            <Button type="primary">Import</Button>
+          </Item>
+        </Flex>
+      </Form>
+
       <hr />
       <div>{/* Additional content can go here */}</div>
     </Wrapper>
