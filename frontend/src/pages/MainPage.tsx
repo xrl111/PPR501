@@ -2,45 +2,67 @@ import React, { useEffect, useState } from 'react';
 import {
   CalendarOutlined,
   ContainerOutlined,
+  FolderOpenOutlined,
+  HomeOutlined,
   ImportOutlined,
   LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  SettingOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import {
   Avatar,
-  Button,
   Layout,
   Menu,
   theme,
   Dropdown,
   MenuProps,
   Space,
+  Breadcrumb,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { ImportQuiz } from '../components/layouts/index';
+import { ImportQuiz, CreateExam } from '../components/layouts/index';
 import { getMe, logout } from '../apis';
 import { useQuery } from '@tanstack/react-query';
+import { CreateExamSchedule } from '../components/layouts/CreateExamSchedule';
+import { findBreadcrumbLabels } from '../utils';
 
-const { Header, Sider, Content, Footer } = Layout;
+const { Header, Sider, Content } = Layout;
 
-const siderItems = [
+const siderItems: MenuProps['items'] = [
   {
-    key: '1',
-    icon: <ImportOutlined />,
-    label: 'Nhập đề',
+    key: 'sub1',
+    icon: <FolderOpenOutlined />,
+    label: 'Quản lý câu hỏi',
+    children: [
+      {
+        key: '1',
+        icon: <ImportOutlined />,
+        label: 'Tạo câu hỏi',
+      },
+    ],
   },
   {
-    key: '2',
-    icon: <ContainerOutlined />,
-    label: 'Tạo đề thi',
+    key: 'sub2',
+    icon: <FolderOpenOutlined />,
+    label: 'Quản lý đề thi',
+    children: [
+      {
+        key: '2',
+        icon: <ContainerOutlined />,
+        label: 'Tạo đề thi',
+      },
+    ],
   },
   {
-    key: '3',
-    icon: <CalendarOutlined />,
-    label: 'Tạo lịch thi',
+    key: 'sub3',
+    icon: <FolderOpenOutlined />,
+    label: 'Quản lý lịch thi',
+    children: [
+      {
+        key: '3',
+        icon: <CalendarOutlined />,
+        label: 'Tạo lịch thi',
+      },
+    ],
   },
 ];
 
@@ -62,23 +84,9 @@ const MainPage: React.FC = () => {
     retry: false,
   });
 
-  const [collapsed, setCollapsed] = useState(false);
-  const [selectedMenuItem, setSelectedMenuItem] = useState('1');
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
-  const toggleCollapsed = () => {
-    setCollapsed(!collapsed);
-  };
-
-  const handleMenuClick = (e: { key: string }) => {
-    setSelectedMenuItem(e.key);
-  };
-
   const items: MenuProps['items'] = [
     {
-      key: '1',
+      key: '0',
       label: data?.username || 'Unknown',
       disabled: true,
     },
@@ -86,25 +94,36 @@ const MainPage: React.FC = () => {
       type: 'divider',
     },
     {
-      key: '2',
-      label: 'Settings',
-      icon: <SettingOutlined />,
-    },
-    {
-      key: '3',
+      key: '1',
       label: 'Logout',
       icon: <LogoutOutlined />,
     },
   ];
+
+  const [selectedMenuItem, setSelectedMenuItem] = useState<string>(() => {
+    return localStorage.getItem('selectedMenuItem') || '1';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('selectedMenuItem', selectedMenuItem);
+  }, [selectedMenuItem]);
+
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
+
+  const handleMenuClick = (e: { key: string }) => {
+    setSelectedMenuItem(e.key);
+  };
 
   const renderContent = () => {
     switch (selectedMenuItem) {
       case '1':
         return <ImportQuiz />;
       case '2':
-        return <div>Content for nav 2</div>;
+        return <CreateExam />;
       case '3':
-        return <div>Content for nav 3</div>;
+        return <CreateExamSchedule />;
       default:
         return <div>Default Content</div>;
     }
@@ -112,10 +131,7 @@ const MainPage: React.FC = () => {
 
   const handleDropdownClick = ({ key }: { key: string }) => {
     switch (key) {
-      case '2':
-        console.log('Settings');
-        break;
-      case '3':
+      case '1':
         handleLogout();
         break;
       default:
@@ -136,73 +152,73 @@ const MainPage: React.FC = () => {
 
   const layoutCSS: React.CSSProperties = {
     height: '100vh',
-  };
-  const logoCSS: React.CSSProperties = {
-    height: '32px',
-    background: 'rgba(255, 255, 255, 0.2)',
-    margin: '16px',
-  };
-  const footerCSS: React.CSSProperties = {
-    textAlign: 'center',
-  };
-  const headerCSS: React.CSSProperties = {
-    padding: 0,
-    background: colorBgContainer,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  };
-  const avatarCSS: React.CSSProperties = {
-    backgroundColor: 'rgb(101, 147, 184)',
-    marginRight: '16px',
+    background: '#fff',
+    color: '#000',
   };
 
+  const headerCSS: React.CSSProperties = {
+    padding: 0,
+    background: '#fff',
+    display: 'flex',
+    justifyContent: 'right',
+    alignItems: 'center',
+    borderBottom: '1px solid #cfcfcf',
+  };
+
+  const avatarCSS: React.CSSProperties = {
+    backgroundColor: 'white',
+    color: 'black',
+    marginRight: '16px',
+    border: '1px solid black',
+  };
+
+  const generateBreadcrumbItems = () => {
+    const labels = findBreadcrumbLabels(selectedMenuItem, siderItems);
+    return [
+      { title: <HomeOutlined /> },
+      ...labels.map((label) => ({ title: label })),
+    ];
+  };
   return (
     <Layout style={layoutCSS}>
-      <Sider trigger={null} collapsible collapsed={collapsed}>
-        <div style={logoCSS} />
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={['1']}
-          items={siderItems}
-          onClick={handleMenuClick}
-        />
-      </Sider>
+      <Header style={headerCSS}>
+        <Dropdown menu={{ items, onClick: handleDropdownClick }}>
+          <a onClick={(e) => e.preventDefault()}>
+            <Space>
+              <Avatar style={avatarCSS} icon={<UserOutlined />} />
+            </Space>
+          </a>
+        </Dropdown>
+      </Header>
+
       <Layout>
-        <Header style={headerCSS}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={toggleCollapsed}
-            style={{
-              fontSize: '16px',
-              width: 64,
-              height: 64,
-            }}
+        <Sider theme="light">
+          <Menu
+            theme="light"
+            mode="inline"
+            selectedKeys={[selectedMenuItem]}
+            items={siderItems}
+            onClick={handleMenuClick}
           />
-          <Dropdown menu={{ items, onClick: handleDropdownClick }}>
-            <a onClick={(e) => e.preventDefault()}>
-              <Space>
-                <Avatar style={avatarCSS} icon={<UserOutlined />} />
-              </Space>
-            </a>
-          </Dropdown>
-        </Header>
-        <Content
-          style={{
-            margin: '24px 16px',
-            padding: 24,
-            minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-          }}
-        >
-          {renderContent()}
-        </Content>
-        <Footer style={footerCSS}>
-          Quizz Master ©{new Date().getFullYear()} Created by Team 2
-        </Footer>
+        </Sider>
+        <Layout>
+          <Breadcrumb
+            style={{ margin: '16px 0', padding: '0 24px', fontSize: 16 }}
+            items={generateBreadcrumbItems()}
+          />
+
+          <Content
+            style={{
+              margin: '24px 16px',
+              padding: 24,
+              minHeight: 280,
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
+            {renderContent()}
+          </Content>
+        </Layout>
       </Layout>
     </Layout>
   );

@@ -1,5 +1,11 @@
 import axios from 'axios';
-import { LoginData, LoginResponse, User } from '../types/index';
+import {
+  ExamData,
+  ExamScheduleData,
+  LoginData,
+  LoginResponse,
+  User,
+} from '../types/index';
 
 const apiClient = axios.create({
   baseURL: 'http://127.0.0.1:8000/api/',
@@ -68,6 +74,7 @@ export const logout = (): string => {
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('accessToken');
   localStorage.removeItem('username');
+  localStorage.removeItem('selectedMenuItem');
   return 'OK';
 };
 
@@ -101,7 +108,7 @@ export const getSubjects = async () => {
   }
 };
 
-export const importExam = async (formData: FormData) => {
+export const createQuestion = async (formData: FormData) => {
   try {
     const response = await apiClient.post('/import-docx/', formData, {
       headers: {
@@ -111,6 +118,26 @@ export const importExam = async (formData: FormData) => {
     return response.data;
   } catch (error) {
     console.error('Error importing exam:', error);
+    throw error;
+  }
+};
+
+export const createExam = async (data: ExamData) => {
+  try {
+    const response = await apiClient.post('/exams/', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating exam:', error);
+    throw error;
+  }
+};
+
+export const createExamScheduleApi = async (data: ExamScheduleData) => {
+  try {
+    const response = await apiClient.post('/exam-schedules/', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating exam schedule:', error);
     throw error;
   }
 };

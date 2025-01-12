@@ -41,3 +41,26 @@ export interface Option {
   value: string;
   label: string;
 }
+
+export interface SubjectOption {
+  id: number;
+  name: string;
+}
+
+export interface ExamOption {
+  id: number;
+  exam_code: string;
+}
+
+export interface ExamData {
+  subject_id: number;
+  exam_code: string;
+  duration: number;
+  num_questions: number;
+}
+
+export interface ExamScheduleData {
+  exam: number;
+  start_time: string;
+  end_time: string;
+}
