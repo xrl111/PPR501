@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, Typography } from 'antd';
+import { Button, Checkbox, Form, Input, Typography, message } from 'antd';
 import background from '../assets/wp6774751.jpg';
 import { useNavigate } from 'react-router-dom';
+import { ErrorResponse, LoginData, LoginResponse } from '../types';
+import { login } from '../apis';
+import { useMutation } from '@tanstack/react-query';
 const { Title } = Typography;
 
 const formStyle: React.CSSProperties = {
@@ -48,22 +51,38 @@ const backgroundStyle: React.CSSProperties = {
   left: 0,
   zIndex: 0,
 };
-interface LoginProps {
-  username: string;
-  password: string;
-}
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const onFinish = (values: LoginProps) => {
-    console.log('Received values of form: ', values);
-    navigate('/main');
+  useEffect(() => {
+    if (localStorage.getItem('username')) {
+      navigate('/main');
+    }
+  });
+  const [messageApi, contextHolder] = message.useMessage();
+  const mutation = useMutation<LoginResponse, ErrorResponse, LoginData>({
+    mutationFn: login,
+    onSuccess: () => {
+      navigate('/main');
+    },
+    onError: (error: ErrorResponse) => {
+      messageApi.open({
+        type: 'error',
+        content: `
+          ${error?.response?.data?.error}
+        `,
+      });
+    },
+  });
+  const onFinish = async (values: LoginData) => {
+    mutation.mutate(values);
   };
 
   return (
     <div style={containerStyle}>
       <div style={backgroundStyle}></div>
       <div style={formWrapperStyle}>
+        {contextHolder}
         <Form
           name="login"
           initialValues={{ remember: true }}
