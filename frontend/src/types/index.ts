@@ -31,8 +31,13 @@ export interface ErrorResponse extends Error {
   statusText: string;
 }
 
-export interface ExamImportData {
-  file: File;
-  exam_id: string;
-  subject_id: string;
+export interface FormValues {
+  exam_id: number;
+  subject_id: number;
+  file: { originFileObj: File }[];
+}
+
+export interface Option {
+  value: string;
+  label: string;
 }

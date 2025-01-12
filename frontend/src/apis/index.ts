@@ -7,6 +7,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -86,6 +87,30 @@ export const getExams = async () => {
     return response.data;
   } catch (error) {
     console.error('Error getting exams:', error);
+    throw error;
+  }
+};
+
+export const getSubjects = async () => {
+  try {
+    const response = await apiClient.get('/subjects/');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting subjects:', error);
+    throw error;
+  }
+};
+
+export const importExam = async (formData: FormData) => {
+  try {
+    const response = await apiClient.post('/import-docx/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error importing exam:', error);
     throw error;
   }
 };
