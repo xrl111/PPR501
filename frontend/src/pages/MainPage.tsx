@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   CalendarOutlined,
   ContainerOutlined,
@@ -21,13 +21,48 @@ import {
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { ImportQuiz } from '../components/layouts/index';
+import { getMe, logout } from '../apis';
+import { useQuery } from '@tanstack/react-query';
 
 const { Header, Sider, Content, Footer } = Layout;
 
+const siderItems = [
+  {
+    key: '1',
+    icon: <ImportOutlined />,
+    label: 'Nhập đề',
+  },
+  {
+    key: '2',
+    icon: <ContainerOutlined />,
+    label: 'Tạo đề thi',
+  },
+  {
+    key: '3',
+    icon: <CalendarOutlined />,
+    label: 'Tạo lịch thi',
+  },
+];
+
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    if (
+      !localStorage.getItem('accessToken') ||
+      !localStorage.getItem('refreshToken') ||
+      !localStorage.getItem('username')
+    ) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const { data } = useQuery({
+    queryKey: ['data'],
+    queryFn: getMe,
+    retry: false,
+  });
+
   const [collapsed, setCollapsed] = useState(false);
-  const [user] = useState('Admin');
   const [selectedMenuItem, setSelectedMenuItem] = useState('1');
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -41,28 +76,10 @@ const MainPage: React.FC = () => {
     setSelectedMenuItem(e.key);
   };
 
-  const siderItems = [
-    {
-      key: '1',
-      icon: <ImportOutlined />,
-      label: 'Nhập đề',
-    },
-    {
-      key: '2',
-      icon: <ContainerOutlined />,
-      label: 'Tạo đề thi',
-    },
-    {
-      key: '3',
-      icon: <CalendarOutlined />,
-      label: 'Tạo lịch thi',
-    },
-  ];
-
   const items: MenuProps['items'] = [
     {
       key: '1',
-      label: user,
+      label: data?.username || 'Unknown',
       disabled: true,
     },
     {
@@ -105,8 +122,16 @@ const MainPage: React.FC = () => {
         break;
     }
   };
+
   const handleLogout = () => {
-    navigate('/login');
+    if (
+      localStorage.getItem('accessToken') &&
+      localStorage.getItem('refreshToken') &&
+      localStorage.getItem('username')
+    ) {
+      logout();
+      navigate('/login');
+    }
   };
 
   const layoutCSS: React.CSSProperties = {
@@ -156,9 +181,7 @@ const MainPage: React.FC = () => {
               height: 64,
             }}
           />
-          <Dropdown
-            overlay={<Menu items={items} onClick={handleDropdownClick} />}
-          >
+          <Dropdown menu={{ items, onClick: handleDropdownClick }}>
             <a onClick={(e) => e.preventDefault()}>
               <Space>
                 <Avatar style={avatarCSS} icon={<UserOutlined />} />

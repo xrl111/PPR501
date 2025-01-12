@@ -13,6 +13,14 @@ export interface LoginResponse {
   };
 }
 
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: number;
+  role_name: string;
+}
+
 export interface ErrorResponse extends Error {
   response: {
     data: {
@@ -21,4 +29,10 @@ export interface ErrorResponse extends Error {
   };
   status: number;
   statusText: string;
+}
+
+export interface ExamImportData {
+  file: File;
+  exam_id: string;
+  subject_id: string;
 }

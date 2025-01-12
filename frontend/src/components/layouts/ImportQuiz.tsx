@@ -1,78 +1,96 @@
 import React from 'react';
-
 import { Wrapper } from '../atoms/Wrapper';
-import { Input, Form, Select, Flex, Button } from 'antd';
+import { Form, Select, Button, Upload } from 'antd';
+import { useQuery } from '@tanstack/react-query';
+import { getExams } from '../../apis';
+import { UploadOutlined } from '@ant-design/icons';
 const { Item } = Form;
-const options = [
-  {
-    value: '1',
-    label: 'Not Identified',
-  },
-  {
-    value: '2',
-    label: 'Closed',
-  },
-  {
-    value: '3',
-    label: 'Communicated',
-  },
-  {
-    value: '4',
-    label: 'Identified',
-  },
-  {
-    value: '5',
-    label: 'Resolved',
-  },
-  {
-    value: '6',
-    label: 'Cancelled',
-  },
-];
+
 interface Option {
   value: string;
   label: string;
 }
+
 const filterSort = (optionA: Option, optionB: Option) => {
   return (optionA?.label ?? '')
     .toLowerCase()
     .localeCompare((optionB?.label ?? '').toLowerCase());
 };
+
 const ImportQuiz: React.FC = () => {
-  const [form] = Form.useForm();
+  const { data: examData } = useQuery({
+    queryKey: ['exam'],
+    queryFn: getExams,
+  });
+
+  const examOptions =
+    examData?.map((exam: any) => ({
+      value: exam.id,
+      label: exam.exam_code,
+    })) ?? [];
+
+  const onFinish = (values: any) => {
+    console.log('Received values:', values);
+    const file = values.file?.[0]?.originFileObj;
+    if (file) {
+      console.log('Selected file:', file);
+    }
+  };
+
+  const normFile = (e: any) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+  };
+
   return (
     <Wrapper>
       <h1>Import Quiz</h1>
       <hr />
-      <Form form={form}>
-        <Flex justify="space-around" wrap>
-          <Item label="Tên lớp">
+      <Form onFinish={onFinish}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            flexWrap: 'wrap',
+          }}
+        >
+          <Item label="Bài thi" name="exam_id">
             <Select
               showSearch
               placeholder="Search to Select"
               optionFilterProp="label"
               filterSort={filterSort}
-              options={options}
+              options={examOptions}
             />
           </Item>
-          <Item label="Tên môn">
+          <Item label="Môn học" name="subject_id">
             <Select
               showSearch
               placeholder="Search to Select"
               optionFilterProp="label"
               filterSort={filterSort}
-              options={options}
+              options={[]}
             />
           </Item>
-          <Item label="File">
-            <Input type="file" />
+          <Item
+            label="File"
+            name="file"
+            valuePropName="fileList"
+            getValueFromEvent={normFile}
+          >
+            <Upload name="file" beforeUpload={() => false} listType="text">
+              <Button icon={<UploadOutlined />}>Click to upload</Button>
+            </Upload>
           </Item>
           <Item>
-            <Button type="primary">Import</Button>
+            <Button type="primary" htmlType="submit">
+              Import
+            </Button>
           </Item>
-        </Flex>
+        </div>
       </Form>
-
       <hr />
       <div>{/* Additional content can go here */}</div>
     </Wrapper>

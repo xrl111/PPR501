@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { LoginData, LoginResponse } from '../types/index';
+import { LoginData, LoginResponse, User } from '../types/index';
 
 const apiClient = axios.create({
   baseURL: 'http://127.0.0.1:8000/api/',
@@ -7,6 +7,18 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export const login = async (data: LoginData): Promise<LoginResponse> => {
   try {
@@ -56,4 +68,24 @@ export const logout = (): string => {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('username');
   return 'OK';
+};
+
+export const getMe = async (): Promise<User> => {
+  try {
+    const response = await apiClient.get('/auth/me/');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting user:', error);
+    throw error;
+  }
+};
+
+export const getExams = async () => {
+  try {
+    const response = await apiClient.get('/exams/');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting exams:', error);
+    throw error;
+  }
 };

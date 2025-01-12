@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, Typography, message } from 'antd';
+import { Button, Form, Input, Typography, message } from 'antd';
 import background from '../assets/wp6774751.jpg';
 import { useNavigate } from 'react-router-dom';
 import { ErrorResponse, LoginData, LoginResponse } from '../types';
@@ -108,14 +108,6 @@ const Login: React.FC = () => {
               placeholder="Password"
             />
           </Form.Item>
-          <Form.Item>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox>Remember me</Checkbox>
-              </Form.Item>
-            </div>
-          </Form.Item>
-
           <Form.Item>
             <Button block type="primary" htmlType="submit">
               Log in
