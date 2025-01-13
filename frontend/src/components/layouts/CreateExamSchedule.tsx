@@ -5,16 +5,6 @@ import { convertToISOString, filterSort } from '../../utils';
 import { getExams, createExamScheduleApi } from '../../apis';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExamOption } from '../../types';
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 6 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 14 },
-  },
-};
 
 const CreateExamSchedule: React.FC = () => {
   const { data: ExamData } = useQuery({
@@ -44,11 +34,21 @@ const CreateExamSchedule: React.FC = () => {
 
     createExamSchedule.mutate({ exam, start_time, end_time });
   };
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 6 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 14 },
+    },
+  };
   return (
     <Wrapper>
       <h1>Create Exam Schedule</h1>
       <hr />
-      <Form {...formItemLayout} onFinish={onFinish}>
+      <Form {...formItemLayout} onFinish={onFinish} style={{ maxWidth: 600 }}>
         <Form.Item label="Exam" name="exam">
           <Select
             showSearch
@@ -56,16 +56,17 @@ const CreateExamSchedule: React.FC = () => {
             optionFilterProp="label"
             filterSort={filterSort}
             options={ExamOptions}
+            size="large"
           />
         </Form.Item>
         <Form.Item label="Start Time" name="start_time">
-          <DatePicker showTime />
+          <DatePicker showTime size="large" />
         </Form.Item>
         <Form.Item label="End Time" name="end_time">
-          <DatePicker showTime />
+          <DatePicker showTime size="large" />
         </Form.Item>
         <Form.Item wrapperCol={{ span: 14, offset: 6 }}>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" size="large">
             Submit
           </Button>
         </Form.Item>

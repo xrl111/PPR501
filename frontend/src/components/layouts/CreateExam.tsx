@@ -1,20 +1,12 @@
 import React from 'react';
 import { Wrapper } from '../atoms';
-import { Button, Form, Input, message, Select } from 'antd';
+import { Button, Form, Input, message, Select, Typography } from 'antd';
 import { filterSort } from '../../utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createExam, getSubjects } from '../../apis';
 import { ExamData, SubjectOption } from '../../types';
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 6 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 14 },
-  },
-};
+const { Item } = Form;
+
 const CreateExam: React.FC = () => {
   const { data: subjectData } = useQuery({
     queryKey: ['subject'],
@@ -38,34 +30,45 @@ const CreateExam: React.FC = () => {
   const onFinish = (values: ExamData) => {
     createQuestionData.mutate(values);
   };
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 6 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 14 },
+    },
+  };
   return (
     <Wrapper>
-      <h1>Create Exam</h1>
+      <Typography.Title level={1}>Tạo bài thi</Typography.Title>
       <hr />
-      <Form {...formItemLayout} onFinish={onFinish}>
-        <Form.Item label="Exam Code" name="exam_code">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Duration" name="duration">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Num questions" name="num_questions">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Subject" name="subject">
+      <Form onFinish={onFinish} {...formItemLayout} style={{ maxWidth: 600 }}>
+        <Item label="Exam Code" name="exam_code">
+          <Input size="large" />
+        </Item>
+        <Item label="Duration" name="duration">
+          <Input size="large" />
+        </Item>
+        <Item label="Num questions" name="num_questions">
+          <Input size="large" />
+        </Item>
+        <Item label="Subject" name="subject">
           <Select
             showSearch
             placeholder="Search to Select"
             optionFilterProp="label"
             filterSort={filterSort}
             options={subjectOptions}
+            size="large"
           />
-        </Form.Item>
-        <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
-          <Button type="primary" htmlType="submit">
+        </Item>
+        <Item wrapperCol={{ offset: 6, span: 16 }}>
+          <Button type="primary" htmlType="submit" size="large">
             Submit
           </Button>
-        </Form.Item>
+        </Item>
       </Form>
     </Wrapper>
   );
