@@ -1,2 +1,2 @@
-export * from './ImportQuiz';
 export * from './CreateExam';
+export * from './GetExams';

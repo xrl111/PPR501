@@ -53,7 +53,7 @@ export interface ExamOption {
 }
 
 export interface ExamData {
-  subject_id: number;
+  subject: number;
   exam_code: string;
   duration: number;
   num_questions: number;

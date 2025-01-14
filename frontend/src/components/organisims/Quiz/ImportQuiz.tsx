@@ -10,12 +10,12 @@ import {
   Col,
   Row,
 } from 'antd';
-import { Wrapper } from '../atoms/Wrapper';
+import { Wrapper } from '../../atoms/Wrapper';
 import { InboxOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getExams, getSubjects, createQuestion } from '../../apis';
-import { filterSort } from '../../utils';
-import { ExamOption, FormValues, SubjectOption } from '../../types';
+import { getExams, getSubjects, createQuestion } from '../../../apis';
+import { filterSort } from '../../../utils';
+import { ExamOption, FormValues, SubjectOption } from '../../../types';
 
 const { Item } = Form;
 const { Dragger } = Upload;
@@ -49,7 +49,7 @@ const ImportQuiz: React.FC = () => {
     onSuccess: () => {
       message.success('Imported successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       message.error(error.message);
     },
   });
@@ -67,7 +67,7 @@ const ImportQuiz: React.FC = () => {
     }
   };
 
-  const normFile = (e: any) => {
+  const normFile = (e: { file: File; fileList: File[] }) => {
     if (Array.isArray(e)) {
       return e;
     }
@@ -96,14 +96,6 @@ const ImportQuiz: React.FC = () => {
     },
   };
 
-  const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = 'src/assets/Ngan_Hang_Cau_Hoi.docx'; // Đường dẫn đến file cần tải
-    link.download = 'Ngan_Hang_Cau_Hoi.docx'; // Tên file khi tải về
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
   return (
     <Wrapper>
       <Typography.Title level={1}>Tạo câu hỏi</Typography.Title>
@@ -138,16 +130,15 @@ const ImportQuiz: React.FC = () => {
         <Row gutter={16}>
           <Col span={24}>
             <Item>
-              <Button type="default" size="large" onClick={downloadFile}>
-                Download Docx Template
-              </Button>
-            </Item>
-          </Col>
-          <Col span={24}>
-            <Item>
               <Typography.Text style={{ color: 'red' }}>
-                Lưu ý: Tải file Ngan_Hang_Cau_Hoi.docx về và sửa lại theo mẫu
-                rồi sau đó import file đó vào đây!
+                Lưu ý: Tải file{' '}
+                <a
+                  href="src/assets/Ngan_Hang_Cau_Hoi.docx"
+                  download={'Ngan_Hang_Cau_Hoi.docx'}
+                >
+                  Ngan_Hang_Cau_Hoi.docx
+                </a>{' '}
+                về và sửa lại theo mẫu rồi sau đó import file đó vào đây!
               </Typography.Text>
             </Item>
           </Col>

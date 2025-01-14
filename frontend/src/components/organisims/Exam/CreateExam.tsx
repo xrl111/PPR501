@@ -1,10 +1,18 @@
 import React from 'react';
-import { Wrapper } from '../atoms';
-import { Button, Form, Input, message, Select, Typography } from 'antd';
-import { filterSort } from '../../utils';
+import { Wrapper } from '../../atoms';
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Select,
+  Typography,
+} from 'antd';
+import { filterSort, validateCreateExamData } from '../../../utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { createExam, getSubjects } from '../../apis';
-import { ExamData, SubjectOption } from '../../types';
+import { createExam, getSubjects } from '../../../apis';
+import { ExamData, SubjectOption } from '../../../types';
 const { Item } = Form;
 
 const CreateExam: React.FC = () => {
@@ -28,7 +36,13 @@ const CreateExam: React.FC = () => {
     },
   });
   const onFinish = (values: ExamData) => {
-    createQuestionData.mutate(values);
+    const errors = validateCreateExamData(values);
+    if (errors.length > 0) {
+      errors.forEach((error) => message.error(error));
+      return;
+    }
+    const formattedExamCode = values.exam_code.toUpperCase().replace(/ /g, '_');
+    createQuestionData.mutate({ ...values, exam_code: formattedExamCode }); //
   };
   const formItemLayout = {
     labelCol: {
@@ -45,15 +59,6 @@ const CreateExam: React.FC = () => {
       <Typography.Title level={1}>Tạo bài thi</Typography.Title>
       <hr />
       <Form onFinish={onFinish} {...formItemLayout} style={{ maxWidth: 600 }}>
-        <Item label="Exam Code" name="exam_code">
-          <Input size="large" />
-        </Item>
-        <Item label="Duration" name="duration">
-          <Input size="large" />
-        </Item>
-        <Item label="Num questions" name="num_questions">
-          <Input size="large" />
-        </Item>
         <Item label="Subject" name="subject">
           <Select
             showSearch
@@ -64,6 +69,16 @@ const CreateExam: React.FC = () => {
             size="large"
           />
         </Item>
+        <Item label="Exam Code" name="exam_code">
+          <Input size="large" />
+        </Item>
+        <Item label="Duration" name="duration">
+          <InputNumber size="large" addonAfter={'Minute'} />
+        </Item>
+        <Item label="Num questions" name="num_questions">
+          <InputNumber size="large" />
+        </Item>
+
         <Item wrapperCol={{ offset: 6, span: 16 }}>
           <Button type="primary" htmlType="submit" size="large">
             Submit

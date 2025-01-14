@@ -19,27 +19,18 @@ import {
   Breadcrumb,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { ImportQuiz, CreateExam } from '../components/layouts/index';
 import { getMe, logout } from '../apis';
 import { useQuery } from '@tanstack/react-query';
-import { CreateExamSchedule } from '../components/layouts/CreateExamSchedule';
 import { findBreadcrumbLabels } from '../utils';
+import {
+  GetExams,
+  CreateExamSchedule,
+  ImportQuiz,
+} from '../components/organisims';
 
 const { Header, Sider, Content } = Layout;
 
 const siderItems: MenuProps['items'] = [
-  {
-    key: 'sub1',
-    icon: <FolderOpenOutlined />,
-    label: 'Quản lý câu hỏi',
-    children: [
-      {
-        key: '1',
-        icon: <ImportOutlined />,
-        label: 'Tạo câu hỏi',
-      },
-    ],
-  },
   {
     key: 'sub2',
     icon: <FolderOpenOutlined />,
@@ -48,7 +39,7 @@ const siderItems: MenuProps['items'] = [
       {
         key: '2',
         icon: <ContainerOutlined />,
-        label: 'Tạo đề thi',
+        label: 'Danh sách đề thi',
       },
     ],
   },
@@ -60,7 +51,19 @@ const siderItems: MenuProps['items'] = [
       {
         key: '3',
         icon: <CalendarOutlined />,
-        label: 'Tạo lịch thi',
+        label: 'Danh sách lịch thi',
+      },
+    ],
+  },
+  {
+    key: 'sub1',
+    icon: <FolderOpenOutlined />,
+    label: 'Quản lý câu hỏi',
+    children: [
+      {
+        key: '1',
+        icon: <ImportOutlined />,
+        label: 'Tạo câu hỏi',
       },
     ],
   },
@@ -121,7 +124,7 @@ const MainPage: React.FC = () => {
       case '1':
         return <ImportQuiz />;
       case '2':
-        return <CreateExam />;
+        return <GetExams />;
       case '3':
         return <CreateExamSchedule />;
       default:
@@ -151,7 +154,7 @@ const MainPage: React.FC = () => {
   };
 
   const layoutCSS: React.CSSProperties = {
-    height: '100vh',
+    minHeight: '100vh',
     background: '#fff',
     color: '#000',
   };

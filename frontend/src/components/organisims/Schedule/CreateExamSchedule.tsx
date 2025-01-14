@@ -1,10 +1,10 @@
 import React from 'react';
-import { Wrapper } from '../atoms';
+import { Wrapper } from '../../atoms';
 import { Form, Select, Button, DatePicker, message } from 'antd';
-import { convertToISOString, filterSort } from '../../utils';
-import { getExams, createExamScheduleApi } from '../../apis';
+import { convertToISOString, filterSort } from '../../../utils';
+import { getExams, createExamScheduleApi } from '../../../apis';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ExamOption } from '../../types';
+import { ExamOption } from '../../../types';
 
 const CreateExamSchedule: React.FC = () => {
   const { data: ExamData } = useQuery({

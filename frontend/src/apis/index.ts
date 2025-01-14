@@ -88,6 +88,16 @@ export const getMe = async (): Promise<User> => {
   }
 };
 
+export const getQuizzes = async () => {
+  try {
+    const response = await apiClient.get('/quizzes/');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting quizzes:', error);
+    throw error;
+  }
+};
+
 export const getExams = async () => {
   try {
     const response = await apiClient.get('/exams/');

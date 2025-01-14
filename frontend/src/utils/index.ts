@@ -1,5 +1,5 @@
 import { MenuProps } from 'antd';
-import { Option } from '../types';
+import { ExamData, Option } from '../types';
 import dayjs from 'dayjs';
 
 export const convertToISOString = (dateObject: any): string => {
@@ -40,4 +40,24 @@ export const findBreadcrumbLabels = (
   return [];
 };
 
+export const validateCreateExamData = (values: ExamData) => {
+  const errors: string[] = [];
 
+  if (!values.subject) {
+    errors.push('Subject is required.');
+  }
+  if (!values.exam_code) {
+    errors.push('Exam Code is required.');
+  }
+  if (!values.num_questions || values.num_questions <= 0) {
+    errors.push('Number of questions must be a positive number.');
+  }
+  if (!values.duration || values.duration <= 0) {
+    errors.push('Duration must be a positive number.');
+  }
+  if (values.duration > 1440) {
+    errors.push('Duration must be less than 24 hours');
+  }
+
+  return errors;
+};
