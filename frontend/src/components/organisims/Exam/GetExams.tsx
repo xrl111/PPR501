@@ -17,12 +17,12 @@ const GetExams: React.FC = () => {
   const handleCancel = () => {
     setOpen(false);
   };
-  const { data: examList } = useQuery({
+  const { data: examList, refetch: refetchExam } = useQuery({
     queryKey: ['exams'],
     queryFn: getExams,
     retry: false,
   });
-  const { data: subjectList } = useQuery({
+  const { data: subjectList, refetch: refetchSubject } = useQuery({
     queryKey: ['subjects'],
     queryFn: getSubjects,
     retry: false,
@@ -73,7 +73,11 @@ const GetExams: React.FC = () => {
       key: 'num_questions',
     },
   ];
-
+  const handleCancelRefetch = () => {
+    refetchExam();
+    refetchSubject();
+    handleCancel();
+  };
   return (
     <Wrapper>
       <Flex justify="space-between" align="center" wrap>
@@ -81,7 +85,7 @@ const GetExams: React.FC = () => {
         <Button type="primary" onClick={showModal}>
           Tạo bài thi
         </Button>
-        <Modal open={open} onCancel={handleCancel} footer={null}>
+        <Modal open={open} onCancel={handleCancelRefetch} footer={null}>
           <CreateExam />
         </Modal>
       </Flex>

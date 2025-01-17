@@ -12,12 +12,12 @@ const GetExamSchedule: React.FC = () => {
 
   const showModal = () => setOpen(true);
   const handleCancel = () => setOpen(false);
-  const { data: examScheduleList } = useQuery({
+  const { data: examScheduleList, refetch: refetchExamSchedule } = useQuery({
     queryKey: ['examSchedule'],
     queryFn: getExamSchedules,
     retry: false,
   });
-  const { data: examData } = useQuery({
+  const { data: examData, refetch: refetchExam } = useQuery({
     queryKey: ['exam'],
     queryFn: getExams,
     retry: false,
@@ -56,6 +56,12 @@ const GetExamSchedule: React.FC = () => {
     start_time: new Date(item.start_time).toLocaleString(),
     end_time: new Date(item.end_time).toLocaleString(),
   }));
+
+  const handleCancelRefetch = () => {
+    refetchExam();
+    refetchExamSchedule();
+    handleCancel();
+  };
   return (
     <Wrapper>
       <div
@@ -70,7 +76,7 @@ const GetExamSchedule: React.FC = () => {
         <Button type="primary" onClick={showModal}>
           Tạo câu hỏi
         </Button>
-        <Modal open={open} onCancel={handleCancel} footer={null}>
+        <Modal open={open} onCancel={handleCancelRefetch} footer={null}>
           <CreateExamSchedule />
         </Modal>
       </div>

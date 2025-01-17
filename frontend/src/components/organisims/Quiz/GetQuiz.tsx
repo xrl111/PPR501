@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Table, Typography, Button, Modal } from 'antd';
+import { Table, Typography, Button, Modal, Image } from 'antd';
 import { getQuestion, getSubjects } from '../../../apis';
 import { Wrapper } from '../../atoms';
 import { ImportQuiz } from './ImportQuiz';
-import { convertISOToDate } from '../../../utils';
+import { convertISOToDate, getImgUrl } from '../../../utils';
 
 interface QuizOption {
   id: string;
@@ -12,6 +12,7 @@ interface QuizOption {
   subject: string;
   duration: string;
   num_questions: number;
+  image?: string;
 }
 
 const GetQuiz: React.FC = () => {
@@ -20,24 +21,24 @@ const GetQuiz: React.FC = () => {
   const showModal = () => setOpen(true);
   const handleCancel = () => setOpen(false);
 
-  const { data: questionList } = useQuery({
+  const { data: questionList, refetch: refetchQuestions } = useQuery({
     queryKey: ['quizzes'],
     queryFn: getQuestion,
     retry: false,
   });
 
-  const { data: subjectList } = useQuery({
+  const { data: subjectList, refetch: refetchSubjects } = useQuery({
     queryKey: ['subjects'],
     queryFn: getSubjects,
     retry: false,
   });
-
   const data = questionList?.map(
     (item: {
       id: string;
       subject: string;
       question_text: string;
       created_at: string;
+      image: string;
     }) => ({
       id: item.id,
       subject: subjectList?.find(
@@ -45,9 +46,14 @@ const GetQuiz: React.FC = () => {
       )?.name,
       question_text: item.question_text,
       created_at: convertISOToDate(item.created_at),
+      image: item.image,
     })
   );
-
+  const handleCancelRefetch = () => {
+    refetchQuestions();
+    refetchSubjects();
+    handleCancel();
+  };
   const columns = [
     {
       title: 'ID',
@@ -69,6 +75,24 @@ const GetQuiz: React.FC = () => {
       dataIndex: 'created_at',
       key: 'created_at',
     },
+    {
+      title: 'Image',
+      dataIndex: 'image',
+      key: 'image',
+      render: (image: string) => {
+        const getImage = getImgUrl(image);
+        console.log(getImage);
+        return (
+          <Image
+            width={100}
+            height={100}
+            src={`${getImage}`}
+            alt="image"
+            sizes="cover"
+          />
+        );
+      },
+    },
   ];
 
   return (
@@ -85,7 +109,12 @@ const GetQuiz: React.FC = () => {
         <Button type="primary" onClick={showModal}>
           Tạo câu hỏi
         </Button>
-        <Modal open={open} onCancel={handleCancel} footer={null} width={1000}>
+        <Modal
+          open={open}
+          onCancel={handleCancelRefetch}
+          footer={null}
+          width={1000}
+        >
           <ImportQuiz />
         </Modal>
       </div>

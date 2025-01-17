@@ -21,6 +21,7 @@ const CreateExam: React.FC = () => {
     queryFn: getSubjects,
     retry: false,
   });
+  const [form] = Form.useForm();
   const subjectOptions =
     subjectData?.map((subject: SubjectOption) => ({
       value: subject.id,
@@ -42,7 +43,8 @@ const CreateExam: React.FC = () => {
       return;
     }
     const formattedExamCode = values.exam_code.toUpperCase().replace(/ /g, '_');
-    createQuestionData.mutate({ ...values, exam_code: formattedExamCode }); //
+    createQuestionData.mutate({ ...values, exam_code: formattedExamCode });
+    form.resetFields();
   };
   const formItemLayout = {
     labelCol: {
@@ -58,7 +60,12 @@ const CreateExam: React.FC = () => {
     <Wrapper>
       <Typography.Title level={1}>Tạo bài thi</Typography.Title>
       <hr />
-      <Form onFinish={onFinish} {...formItemLayout} style={{ maxWidth: 600 }}>
+      <Form
+        form={form}
+        onFinish={onFinish}
+        {...formItemLayout}
+        style={{ maxWidth: 600 }}
+      >
         <Item label="Subject" name="subject">
           <Select
             showSearch

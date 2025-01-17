@@ -25,12 +25,7 @@ import { getMe, logout } from '../apis';
 import { useQuery } from '@tanstack/react-query';
 import { findBreadcrumbLabels, isValidToken } from '../utils';
 import logo from '../assets/Logo.jpg';
-import {
-  GetExams,
-  CreateExamSchedule,
-  GetQuiz,
-  GetExamSchedule,
-} from '../components/organisims';
+import { GetExams, GetQuiz, GetExamSchedule } from '../components/organisims';
 
 const { Header, Sider, Content } = Layout;
 

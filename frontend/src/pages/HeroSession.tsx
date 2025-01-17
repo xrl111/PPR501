@@ -86,7 +86,7 @@ const HeroSession: React.FC = () => {
         <Content style={contentStyle}>
           <Flex vertical justify="center" align="center">
             <Title level={1} style={{ color: 'white' }}>
-              Welcome to the Quizz App
+              Welcome to the QuizNova
             </Title>
             <Flex gap="20px" justify="center" align="center">
               <ConfigProvider

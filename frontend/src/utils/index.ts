@@ -98,3 +98,10 @@ export const isValidToken = (): boolean => {
 export const convertISOToDate = (isoString: string): string => {
   return dayjs(isoString).format('YYYY-MM-DD HH:mm:ss');
 };
+
+export const getImgUrl = (img: string): string => {
+  if (!img) return 'null';
+  const urlPattern = /(https?:\/\/[^\s]+)/;
+  const match = img.match(urlPattern);
+  return match ? match[0] : 'null';
+};
