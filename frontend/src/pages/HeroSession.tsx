@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Layout, Typography, Button, Flex, ConfigProvider } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import quizz from '../assets/Quizz.jpg';
 import { createStyles } from 'antd-style';
+import { isValidToken } from '../utils';
 const { Content } = Layout;
 const { Title } = Typography;
 const contentStyle: React.CSSProperties = {
@@ -67,6 +68,12 @@ const useStyle = createStyles(({ prefixCls, css }) => ({
 const HeroSession: React.FC = () => {
   const navigate = useNavigate();
   const { styles } = useStyle();
+
+  useEffect(() => {
+    if (isValidToken()) {
+      navigate('/main');
+    }
+  }, [navigate]);
   const handleNavigate = (navItem: string) => {
     if (navItem === 'login') {
       navigate('/login');

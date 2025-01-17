@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Table, Typography, Button, Modal } from 'antd';
 import { Wrapper } from '../../atoms';
 import { Flex } from 'antd';
-import { getExams } from '../../../apis';
+import { getExams, getSubjects } from '../../../apis';
 import { ExamOption } from '../../../types';
 import { CreateExam } from './CreateExam';
 
@@ -17,13 +17,41 @@ const GetExams: React.FC = () => {
   const handleCancel = () => {
     setOpen(false);
   };
-  const { data } = useQuery({
+  const { data: examList } = useQuery({
     queryKey: ['exams'],
     queryFn: getExams,
     retry: false,
   });
+  const { data: subjectList } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: getSubjects,
+    retry: false,
+  });
+
+  const data = examList?.map(
+    (item: {
+      id: string;
+      exam_code: string;
+      subject: string;
+      duration: number;
+      num_questions: number;
+    }) => ({
+      id: item.id,
+      exam_code: item.exam_code,
+      subject: subjectList?.find(
+        (subject: { id: string; name: string }) => subject.id === item.subject
+      )?.name,
+      duration: `${item.duration} minutes`,
+      num_questions: item.num_questions,
+    })
+  );
 
   const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+    },
     {
       title: 'Exam Code',
       dataIndex: 'exam_code',

@@ -30,6 +30,9 @@ apiClient.interceptors.request.use(
 export const login = async (data: LoginData): Promise<LoginResponse> => {
   try {
     const response = await apiClient.post<LoginResponse>('/auth/login/', data);
+    if (!response?.data) {
+      throw new Error('No response data');
+    }
     const { refresh, access, username } = response.data;
 
     // Store tokens in local storage
@@ -88,12 +91,12 @@ export const getMe = async (): Promise<User> => {
   }
 };
 
-export const getQuizzes = async () => {
+export const getQuestion = async () => {
   try {
-    const response = await apiClient.get('/quizzes/');
+    const response = await apiClient.get('/questions/');
     return response.data;
   } catch (error) {
-    console.error('Error getting quizzes:', error);
+    console.error('Error getting question:', error);
     throw error;
   }
 };
@@ -118,9 +121,19 @@ export const getSubjects = async () => {
   }
 };
 
+export const getExamSchedules = async () => {
+  try {
+    const response = await apiClient.get('/exam-schedules/');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting exam schedules:', error);
+    throw error;
+  }
+};
+
 export const createQuestion = async (formData: FormData) => {
   try {
-    const response = await apiClient.post('/import-docx/', formData, {
+    const response = await apiClient.post('/exam-import-docx/', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

@@ -1,6 +1,7 @@
 import { MenuProps } from 'antd';
-import { ExamData, Option } from '../types';
+import { DecodedToken, ExamData, Option } from '../types';
 import dayjs from 'dayjs';
+import { jwtDecode } from 'jwt-decode';
 
 export const convertToISOString = (dateObject: any): string => {
   if (dateObject && dateObject.$d) {
@@ -60,4 +61,40 @@ export const validateCreateExamData = (values: ExamData) => {
   }
 
   return errors;
+};
+
+export const isValidToken = (): boolean => {
+  const token = localStorage.getItem('accessToken');
+  const refreshToken = localStorage.getItem('refreshToken');
+  const username = localStorage.getItem('username');
+
+  if (!token || !refreshToken || !username) {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('username');
+    return false;
+  }
+
+  try {
+    const decoded: DecodedToken = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    if (decoded.exp > currentTime) {
+      return true;
+    } else {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('username');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('username');
+    return false;
+  }
+};
+
+export const convertISOToDate = (isoString: string): string => {
+  return dayjs(isoString).format('YYYY-MM-DD HH:mm:ss');
 };

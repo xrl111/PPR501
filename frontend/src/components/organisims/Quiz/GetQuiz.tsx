@@ -1,64 +1,102 @@
-// import React from 'react';
-// import { useQuery } from '@tanstack/react-query';
-// import { Table, Typography, Spin, Alert } from 'antd';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Table, Typography, Button, Modal } from 'antd';
+import { getQuestion, getSubjects } from '../../../apis';
+import { Wrapper } from '../../atoms';
+import { ImportQuiz } from './ImportQuiz';
+import { convertISOToDate } from '../../../utils';
 
-// const GetQuiz: React.FC = () => {
-//   const { data, isLoading, error } = useQuery({
-//     queryKey: ['quizzes'],
-//     queryFn: getQuizzes,
-//   });
+interface QuizOption {
+  id: string;
+  quiz_code: string;
+  subject: string;
+  duration: string;
+  num_questions: number;
+}
 
-//   if (isLoading) {
-//     return <Spin tip="Loading quizzes..." />;
-//   }
+const GetQuiz: React.FC = () => {
+  const [open, setOpen] = useState(false);
 
-//   if (error) {
-//     return (
-//       <Alert
-//         message="Error"
-//         description="Failed to load quizzes."
-//         type="error"
-//         showIcon
-//       />
-//     );
-//   }
+  const showModal = () => setOpen(true);
+  const handleCancel = () => setOpen(false);
 
-//   const columns = [
-//     {
-//       title: 'Quiz Code',
-//       dataIndex: 'quiz_code',
-//       key: 'quiz_code',
-//     },
-//     {
-//       title: 'Subject',
-//       dataIndex: 'subject',
-//       key: 'subject',
-//     },
-//     {
-//       title: 'Duration',
-//       dataIndex: 'duration',
-//       key: 'duration',
-//     },
-//     {
-//       title: 'Number of Questions',
-//       dataIndex: 'num_questions',
-//       key: 'num_questions',
-//     },
-//   ];
+  const { data: questionList } = useQuery({
+    queryKey: ['quizzes'],
+    queryFn: getQuestion,
+    retry: false,
+  });
 
-//   return (
-//     <Wrapper>
-//       <FLex justify="space-between" align="center" wrap>
-//         <Typography.Title level={2}>Danh sách câu hỏi</Typography.Title>
-//       </FLex>
-//       <Table
-//         columns={columns}
-//         dataSource={data as QuizOption[]}
-//         rowKey="id"
-//         scroll={{ x: 'max-content' }}
-//       />
-//     </Wrapper>
-//   );
-// };
+  const { data: subjectList } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: getSubjects,
+    retry: false,
+  });
 
-// export { GetQuiz };
+  const data = questionList?.map(
+    (item: {
+      id: string;
+      subject: string;
+      question_text: string;
+      created_at: string;
+    }) => ({
+      id: item.id,
+      subject: subjectList?.find(
+        (subject: { id: string; name: string }) => subject.id === item.subject
+      )?.name,
+      question_text: item.question_text,
+      created_at: convertISOToDate(item.created_at),
+    })
+  );
+
+  const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+    },
+    {
+      title: 'Subject',
+      dataIndex: 'subject',
+      key: 'subject',
+    },
+    {
+      title: 'Question Text',
+      dataIndex: 'question_text',
+      key: 'question_text',
+    },
+    {
+      title: 'Created At',
+      dataIndex: 'created_at',
+      key: 'created_at',
+    },
+  ];
+
+  return (
+    <Wrapper>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+        }}
+      >
+        <Typography.Title level={2}>Danh sách câu hỏi</Typography.Title>
+        <Button type="primary" onClick={showModal}>
+          Tạo câu hỏi
+        </Button>
+        <Modal open={open} onCancel={handleCancel} footer={null} width={1000}>
+          <ImportQuiz />
+        </Modal>
+      </div>
+      <Table
+        columns={columns}
+        dataSource={data as QuizOption[]}
+        rowKey="id"
+        scroll={{ x: 'max-content' }}
+      />
+    </Wrapper>
+  );
+};
+
+export { GetQuiz };

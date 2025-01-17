@@ -7,6 +7,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExamOption } from '../../../types';
 
 const CreateExamSchedule: React.FC = () => {
+  const [form] = Form.useForm();
   const { data: ExamData } = useQuery({
     queryKey: ['subject'],
     queryFn: getExams,
@@ -21,6 +22,7 @@ const CreateExamSchedule: React.FC = () => {
     mutationFn: createExamScheduleApi,
     onSuccess: () => {
       message.success('Imported successfully');
+      form.resetFields();
     },
     onError: (error: Error) => {
       message.error(error.message);
@@ -48,7 +50,12 @@ const CreateExamSchedule: React.FC = () => {
     <Wrapper>
       <h1>Create Exam Schedule</h1>
       <hr />
-      <Form {...formItemLayout} onFinish={onFinish} style={{ maxWidth: 600 }}>
+      <Form
+        form={form}
+        {...formItemLayout}
+        onFinish={onFinish}
+        style={{ maxWidth: 600 }}
+      >
         <Form.Item label="Exam" name="exam">
           <Select
             showSearch

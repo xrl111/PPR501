@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Typography, message } from 'antd';
+import { Button, Checkbox, Form, Input, Typography, message } from 'antd';
 import background from '../assets/wp6774751.jpg';
 import { useNavigate } from 'react-router-dom';
 import { ErrorResponse, LoginData, LoginResponse } from '../types';
 import { login } from '../apis';
 import { useMutation } from '@tanstack/react-query';
+import { isValidToken } from '../utils';
 const { Title } = Typography;
 
 const formStyle: React.CSSProperties = {
@@ -55,10 +56,10 @@ const backgroundStyle: React.CSSProperties = {
 const Login: React.FC = () => {
   const navigate = useNavigate();
   useEffect(() => {
-    if (localStorage.getItem('username')) {
+    if (isValidToken()) {
       navigate('/main');
     }
-  });
+  }, [navigate]);
   const [messageApi, contextHolder] = message.useMessage();
   const mutation = useMutation<LoginResponse, ErrorResponse, LoginData>({
     mutationFn: login,
@@ -108,6 +109,14 @@ const Login: React.FC = () => {
               placeholder="Password"
             />
           </Form.Item>
+          <Form.Item>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Form.Item name="remember" valuePropName="checked" noStyle>
+                <Checkbox>Remember me</Checkbox>
+              </Form.Item>
+            </div>
+          </Form.Item>
+
           <Form.Item>
             <Button block type="primary" htmlType="submit">
               Log in

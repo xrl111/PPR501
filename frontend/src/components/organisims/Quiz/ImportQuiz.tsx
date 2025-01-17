@@ -1,30 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Form,
   Select,
   Button,
   Upload,
   message,
-  UploadProps,
   Typography,
   Col,
   Row,
+  UploadProps,
+  Flex,
 } from 'antd';
 import { Wrapper } from '../../atoms/Wrapper';
 import { InboxOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getExams, getSubjects, createQuestion } from '../../../apis';
 import { filterSort } from '../../../utils';
-import { ExamOption, FormValues, SubjectOption } from '../../../types';
+import {
+  ExamData,
+  ExamOption,
+  Exam,
+  FormValues,
+  SubjectOption,
+} from '../../../types';
 
 const { Item } = Form;
 const { Dragger } = Upload;
+
 const ImportQuiz: React.FC = () => {
-  const { data: examData } = useQuery({
-    queryKey: ['exam'],
-    queryFn: getExams,
-    retry: false,
-  });
+  const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(
+    null
+  );
+  const [examOptions, setExamOptions] = useState<Exam[]>([]);
+  const [form] = Form.useForm();
 
   const { data: subjectData } = useQuery({
     queryKey: ['subject'],
@@ -32,22 +40,40 @@ const ImportQuiz: React.FC = () => {
     retry: false,
   });
 
-  const examOptions =
-    examData?.map((exam: ExamOption) => ({
-      value: exam.id,
-      label: exam.exam_code,
-    })) ?? [];
+  const { data: examData, refetch: refetchExams } = useQuery({
+    queryKey: ['exams', selectedSubjectId],
+    queryFn: getExams,
+    enabled: !!selectedSubjectId,
+    retry: false,
+  });
 
-  const subjectOptions =
-    subjectData?.map((subject: SubjectOption) => ({
-      value: subject.id,
-      label: subject.name,
-    })) ?? [];
+  const subjectOptions = useMemo(
+    () =>
+      subjectData?.map((subject: SubjectOption) => ({
+        value: subject.id,
+        label: subject.name,
+      })) ?? [],
+    [subjectData]
+  );
+
+  useEffect(() => {
+    if (subjectOptions.length > 0 && selectedSubjectId !== null && examData) {
+      const filteredExams = examData
+        .filter((exam: ExamData) => exam.subject === selectedSubjectId)
+        .map((exam: ExamOption) => ({
+          ...exam,
+          value: exam.id,
+          label: exam.exam_code,
+        }));
+      setExamOptions(filteredExams);
+    }
+  }, [subjectOptions, selectedSubjectId, examData]);
 
   const createQuestionData = useMutation({
     mutationFn: createQuestion,
     onSuccess: () => {
       message.success('Imported successfully');
+      form.resetFields();
     },
     onError: (error: Error) => {
       message.error(error.message);
@@ -55,10 +81,8 @@ const ImportQuiz: React.FC = () => {
   });
 
   const onFinish = (values: FormValues) => {
-    console.log('Received values:', values);
     const file = values.file?.[0]?.originFileObj;
     if (file) {
-      console.log('Selected file:', file);
       const formData = new FormData();
       formData.append('file', file);
       formData.append('exam_id', values.exam_id.toString());
@@ -68,13 +92,10 @@ const ImportQuiz: React.FC = () => {
   };
 
   const normFile = (e: { file: File; fileList: File[] }) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e?.fileList;
+    return Array.isArray(e) ? e : e?.fileList;
   };
 
-  const props: UploadProps = {
+  const uploadProps: UploadProps = {
     beforeUpload: (file) => {
       const isDocx =
         file.type ===
@@ -96,11 +117,17 @@ const ImportQuiz: React.FC = () => {
     },
   };
 
+  useEffect(() => {
+    if (selectedSubjectId) {
+      refetchExams();
+    }
+  }, [selectedSubjectId, refetchExams]);
+
   return (
     <Wrapper>
       <Typography.Title level={1}>Tạo câu hỏi</Typography.Title>
       <hr />
-      <Form onFinish={onFinish} layout="vertical">
+      <Form form={form} onFinish={onFinish} layout="vertical">
         <Row gutter={16}>
           <Col span={12}>
             <Item label="Môn học" name="subject_id">
@@ -111,6 +138,7 @@ const ImportQuiz: React.FC = () => {
                 filterSort={filterSort}
                 options={subjectOptions}
                 size="large"
+                onChange={(value) => setSelectedSubjectId(value)}
               />
             </Item>
           </Col>
@@ -133,7 +161,7 @@ const ImportQuiz: React.FC = () => {
               <Typography.Text style={{ color: 'red' }}>
                 Lưu ý: Tải file{' '}
                 <a
-                  href="src/assets/Ngan_Hang_Cau_Hoi.docx"
+                  href="/src/assets/Ngan_Hang_Cau_Hoi.docx"
                   download={'Ngan_Hang_Cau_Hoi.docx'}
                 >
                   Ngan_Hang_Cau_Hoi.docx
@@ -148,7 +176,7 @@ const ImportQuiz: React.FC = () => {
               valuePropName="fileList"
               getValueFromEvent={normFile}
             >
-              <Dragger {...props} name="file" listType="text">
+              <Dragger {...uploadProps} name="file" listType="text">
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
@@ -165,11 +193,13 @@ const ImportQuiz: React.FC = () => {
         </Row>
         <Row gutter={16}>
           <Col span={24}>
-            <Item>
-              <Button type="primary" htmlType="submit" size="large">
-                Import
-              </Button>
-            </Item>
+            <Flex justify="end" align="center" style={{ marginTop: 16 }}>
+              <Item>
+                <Button type="primary" htmlType="submit" size="large">
+                  Import
+                </Button>
+              </Item>
+            </Flex>
           </Col>
         </Row>
       </Form>

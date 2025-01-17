@@ -17,53 +17,57 @@ import {
   MenuProps,
   Space,
   Breadcrumb,
+  Typography,
+  Flex,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { getMe, logout } from '../apis';
 import { useQuery } from '@tanstack/react-query';
-import { findBreadcrumbLabels } from '../utils';
+import { findBreadcrumbLabels, isValidToken } from '../utils';
+import logo from '../assets/Logo.jpg';
 import {
   GetExams,
   CreateExamSchedule,
-  ImportQuiz,
+  GetQuiz,
+  GetExamSchedule,
 } from '../components/organisims';
 
 const { Header, Sider, Content } = Layout;
 
 const siderItems: MenuProps['items'] = [
   {
-    key: 'sub2',
+    key: 'sub1',
     icon: <FolderOpenOutlined />,
     label: 'Quản lý đề thi',
     children: [
       {
-        key: '2',
+        key: '1',
         icon: <ContainerOutlined />,
         label: 'Danh sách đề thi',
       },
     ],
   },
   {
-    key: 'sub3',
+    key: 'sub2',
     icon: <FolderOpenOutlined />,
     label: 'Quản lý lịch thi',
     children: [
       {
-        key: '3',
+        key: '2',
         icon: <CalendarOutlined />,
         label: 'Danh sách lịch thi',
       },
     ],
   },
   {
-    key: 'sub1',
+    key: 'sub3',
     icon: <FolderOpenOutlined />,
     label: 'Quản lý câu hỏi',
     children: [
       {
-        key: '1',
+        key: '3',
         icon: <ImportOutlined />,
-        label: 'Tạo câu hỏi',
+        label: 'Danh sách câu hỏi',
       },
     ],
   },
@@ -72,16 +76,12 @@ const siderItems: MenuProps['items'] = [
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
   useEffect(() => {
-    if (
-      !localStorage.getItem('accessToken') ||
-      !localStorage.getItem('refreshToken') ||
-      !localStorage.getItem('username')
-    ) {
+    if (!isValidToken()) {
       navigate('/login');
     }
   }, [navigate]);
 
-  const { data } = useQuery({
+  const { data: userData } = useQuery({
     queryKey: ['data'],
     queryFn: getMe,
     retry: false,
@@ -90,7 +90,7 @@ const MainPage: React.FC = () => {
   const items: MenuProps['items'] = [
     {
       key: '0',
-      label: data?.username || 'Unknown',
+      label: userData?.user.username || 'Unknown',
       disabled: true,
     },
     {
@@ -122,11 +122,11 @@ const MainPage: React.FC = () => {
   const renderContent = () => {
     switch (selectedMenuItem) {
       case '1':
-        return <ImportQuiz />;
-      case '2':
         return <GetExams />;
+      case '2':
+        return <GetExamSchedule />;
       case '3':
-        return <CreateExamSchedule />;
+        return <GetQuiz />;
       default:
         return <div>Default Content</div>;
     }
@@ -161,11 +161,11 @@ const MainPage: React.FC = () => {
 
   const headerCSS: React.CSSProperties = {
     padding: 0,
+    margin: 10,
     background: '#fff',
     display: 'flex',
-    justifyContent: 'right',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottom: '1px solid #cfcfcf',
   };
 
   const avatarCSS: React.CSSProperties = {
@@ -182,20 +182,45 @@ const MainPage: React.FC = () => {
       ...labels.map((label) => ({ title: label })),
     ];
   };
+  const logoStyle: React.CSSProperties = {
+    width: 70,
+    height: 50,
+    marginRight: 16,
+    marginLeft: 16,
+  };
   return (
     <Layout style={layoutCSS}>
       <Header style={headerCSS}>
+        <Flex
+          align="center"
+          onClick={() => {
+            setSelectedMenuItem('1');
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+          <img src={logo} alt="logo" style={logoStyle} />
+          <Typography.Text
+            style={{
+              color: 'black',
+              textTransform: 'uppercase',
+              fontWeight: 700,
+              fontSize: 30,
+            }}
+          >
+            QuizNova
+          </Typography.Text>
+        </Flex>
         <Dropdown menu={{ items, onClick: handleDropdownClick }}>
           <a onClick={(e) => e.preventDefault()}>
             <Space>
-              <Avatar style={avatarCSS} icon={<UserOutlined />} />
+              <Avatar style={avatarCSS} icon={<UserOutlined />} size="large" />
             </Space>
           </a>
         </Dropdown>
       </Header>
-
+      <div style={{ borderBottom: '1px solid #cfcfcf' }} />
       <Layout>
-        <Sider theme="light">
+        <Sider theme="light" width={250}>
           <Menu
             theme="light"
             mode="inline"
